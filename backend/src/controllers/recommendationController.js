@@ -32,7 +32,7 @@ export const recommendationController = {
         pastGifts = history.all.map(g => g.name);
       }
 
-      const result = await generateRecommendations({
+      let result = await generateRecommendations({
         description: description.trim(),
         name: name.trim(),
         relationship: relationship.trim(),
@@ -42,6 +42,12 @@ export const recommendationController = {
         excludedGifts: Array.isArray(excluded_gifts) ? excluded_gifts : [],
         pastGifts
       });
+
+      // --- SEMANTIC DEDUPLICATION ---
+      const { filterSemanticDuplicates } = await import('../services/embeddingService.js');
+      const deduplicatedGifts = await filterSemanticDuplicates(result.gifts, pastGifts);
+      result.gifts = deduplicatedGifts;
+      // -----------------------------
 
       // If user provided a name or we have an active recipient, persist or update
       if (!activeRecipientId && name.trim()) {
@@ -111,7 +117,7 @@ export const recommendationController = {
         allPastGifts = [...new Set([...allPastGifts, ...historyNames])];
       }
 
-      const result = await refineRecommendations({
+      let result = await refineRecommendations({
         recipientInfo: recipient_info,
         conversationHistory: conversation_history,
         previousRecommendations: previous_recommendations,
@@ -119,6 +125,12 @@ export const recommendationController = {
         excludedGifts: Array.isArray(excluded_gifts) ? excluded_gifts : [],
         pastGifts: allPastGifts
       });
+
+      // --- SEMANTIC DEDUPLICATION ---
+      const { filterSemanticDuplicates } = await import('../services/embeddingService.js');
+      const deduplicatedGifts = await filterSemanticDuplicates(result.gifts, allPastGifts);
+      result.gifts = deduplicatedGifts;
+      // -----------------------------
 
       let savedGifts = result.gifts;
       if (recipient_id) {

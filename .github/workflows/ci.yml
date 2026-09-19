@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+          
+      - name: Install Dependencies
+        run: cd backend && npm ci || npm install
+        
+      - name: Check for API Keys in code
+        run: |
+          if grep -rnw . -e 'sk-[a-zA-Z0-9]\{48\}' --exclude-dir=node_modules --exclude-dir=.git; then
+            echo "ERROR: Potential OpenAI key found in tracked files!"
+            exit 1
+          fi
+          if grep -rnw . -e 'AIza[0-9A-Za-z-_]\{35\}' --exclude-dir=node_modules --exclude-dir=.git; then
+            echo "ERROR: Potential Gemini key found in tracked files!"
+            exit 1
+          fi
+
+      - name: Run Backend Tests
+        run: cd backend && npm test
+        env:
+          JWT_SECRET: ci_test_secret_key_only_for_tests

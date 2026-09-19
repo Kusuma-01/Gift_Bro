@@ -69,8 +69,19 @@ export async function getDatabase() {
  */
 function initializeSchema(db) {
   db.run(`
+    CREATE TABLE IF NOT EXISTS users (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      email TEXT UNIQUE NOT NULL,
+      password_hash TEXT NOT NULL,
+      reset_token TEXT,
+      reset_token_expires TEXT,
+      created_at TEXT NOT NULL
+    );
+
     CREATE TABLE IF NOT EXISTS recipients (
       id TEXT PRIMARY KEY,
+      user_id TEXT,
       name TEXT NOT NULL,
       relationship TEXT,
       description TEXT,
@@ -84,6 +95,7 @@ function initializeSchema(db) {
     CREATE TABLE IF NOT EXISTS gifts (
       id TEXT PRIMARY KEY,
       recipient_id TEXT,
+      user_id TEXT,
       name TEXT NOT NULL,
       price_range TEXT,
       category TEXT,
@@ -92,6 +104,7 @@ function initializeSchema(db) {
       rank INTEGER,
       status TEXT DEFAULT 'suggested',
       batch_id TEXT,
+      feedback INTEGER,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL
     );
@@ -99,6 +112,7 @@ function initializeSchema(db) {
     CREATE TABLE IF NOT EXISTS conversations (
       id TEXT PRIMARY KEY,
       recipient_id TEXT,
+      user_id TEXT,
       role TEXT NOT NULL,
       content TEXT NOT NULL,
       metadata TEXT,
@@ -124,11 +138,21 @@ function initializeSchema(db) {
       expires_at TEXT NOT NULL
     );
 
+    CREATE TABLE IF NOT EXISTS gift_embedding_cache (
+      id TEXT PRIMARY KEY,
+      normalized_text TEXT UNIQUE NOT NULL,
+      embedding_json TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    );
+
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email);
+    CREATE INDEX IF NOT EXISTS idx_recipients_user ON recipients(user_id);
     CREATE INDEX IF NOT EXISTS idx_gifts_recipient ON gifts(recipient_id);
     CREATE INDEX IF NOT EXISTS idx_gifts_status ON gifts(status);
     CREATE INDEX IF NOT EXISTS idx_conv_recipient ON conversations(recipient_id);
     CREATE INDEX IF NOT EXISTS idx_clicks_platform ON shopping_clicks(platform);
     CREATE UNIQUE INDEX IF NOT EXISTS idx_cache_key ON ai_response_cache(cache_key);
     CREATE INDEX IF NOT EXISTS idx_cache_expires ON ai_response_cache(expires_at);
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_embedding_text ON gift_embedding_cache(normalized_text);
   `);
 }

@@ -11,13 +11,16 @@ export const recipientController = {
         return res.status(400).json({ error: 'Recipient name is required.' });
       }
 
+      const userId = req.user ? req.user.id : null;
+
       const recipient = await dbService.createRecipient({
         name,
         relationship,
         description,
         age,
         budget,
-        occasion
+        occasion,
+        userId
       });
 
       return res.status(201).json(recipient);
@@ -32,7 +35,15 @@ export const recipientController = {
    */
   async getRecipients(req, res) {
     try {
-      const recipients = await dbService.getAllRecipients();
+      const { page, limit } = req.query;
+      const userId = req.user ? req.user.id : null;
+
+      if (page || limit) {
+        const paginated = await dbService.getPaginatedRecipients({ page, limit, userId });
+        return res.json(paginated);
+      }
+
+      const recipients = await dbService.getAllRecipients(userId);
       return res.json(recipients);
     } catch (err) {
       console.error('Error fetching recipients:', err);

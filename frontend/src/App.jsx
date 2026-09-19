@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useApp } from './context/AppContext';
 import Navbar from './components/Navbar';
 import HeroSection from './components/HeroSection';
@@ -11,10 +11,25 @@ import LoadingState from './components/LoadingState';
 import ErrorMessage from './components/ErrorMessage';
 import EmptyState from './components/EmptyState';
 import Toast from './components/Toast';
+import AuthModal from './components/AuthModal';
+import ComparisonModal from './components/ComparisonModal';
+import ShoppingModal from './components/ShoppingModal';
 import { Gift, Heart } from 'lucide-react';
 
 export default function App() {
-  const { activeTab, isLoading, recommendations, error } = useApp();
+  const { 
+    activeTab, 
+    isLoading, 
+    recommendations, 
+    error,
+    isAuthModalOpen,
+    setIsAuthModalOpen,
+    isComparisonModalOpen,
+    setIsComparisonModalOpen,
+    selectedForComparison,
+  } = useApp();
+
+  const [activeCompareShopGift, setActiveCompareShopGift] = useState(null);
 
   return (
     <div className="min-h-screen flex flex-col bg-[#FCFAF6] text-slate-800">
@@ -53,6 +68,32 @@ export default function App() {
 
         {activeTab === 'history' && <GiftHistory />}
       </main>
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+      />
+
+      {/* Side-by-side Gift Comparison Modal */}
+      <ComparisonModal
+        isOpen={isComparisonModalOpen}
+        onClose={() => setIsComparisonModalOpen(false)}
+        gifts={selectedForComparison}
+        onShopNow={(gift) => {
+          setIsComparisonModalOpen(false);
+          setActiveCompareShopGift(gift);
+        }}
+      />
+
+      {/* Shopping Modal for comparison selection */}
+      {activeCompareShopGift && (
+        <ShoppingModal
+          isOpen={!!activeCompareShopGift}
+          onClose={() => setActiveCompareShopGift(null)}
+          gift={activeCompareShopGift}
+        />
+      )}
 
       {/* Footer */}
       <footer className="border-t border-orange-100/80 bg-white/60 py-8 text-center text-xs text-slate-500">

@@ -5,12 +5,20 @@ const BASE_URL = '/api';
  */
 async function request(endpoint, options = {}) {
   const url = `${BASE_URL}${endpoint}`;
+  const token = localStorage.getItem('giftbro_token');
+
+  const headers = {
+    'Content-Type': 'application/json',
+    ...options.headers,
+  };
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
   const config = {
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
     ...options,
+    headers
   };
 
   const response = await fetch(url, config);
@@ -24,6 +32,11 @@ async function request(endpoint, options = {}) {
 }
 
 export const api = {
+  // Auth
+  register: (payload) => request('/auth/register', { method: 'POST', body: JSON.stringify(payload) }),
+  login: (payload) => request('/auth/login', { method: 'POST', body: JSON.stringify(payload) }),
+  getMe: () => request('/auth/me'),
+
   // System / AI status
   getAiStatus: () => request('/ai-status'),
   getHealth: () => request('/health'),

@@ -7,16 +7,22 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "test": "node test/api.test.js && node test/shopping.test.js && node test/cache.test.js",
+    "test": "node --test test/*.test.js",
     "test:shopping": "node test/shopping.test.js",
-    "test:cache": "node test/cache.test.js"
+    "test:cache": "node test/cache.test.js",
+    "test:coverage": "c8 node --test test/"
   },
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "express-rate-limit": "^8.7.0",
+    "express-validator": "^7.3.2",
+    "helmet": "^8.3.0",
     "sql.js": "^1.12.0",
-    "uuid": "^11.0.5"
+    "swagger-ui-express": "^5.0.1",
+    "uuid": "^11.0.5",
+    "yaml": "^2.9.1"
   },
   "keywords": [
     "gift-recommendation",
@@ -25,5 +31,8 @@
     "sqlite"
   ],
   "author": "GiftBro Team",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "c8": "^12.0.0"
+  }
 }

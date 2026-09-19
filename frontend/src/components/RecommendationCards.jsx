@@ -2,10 +2,10 @@ import React from 'react';
 import { useApp } from '../context/AppContext';
 import RecommendationCard from './RecommendationCard';
 import ExportButton from './ExportButton';
-import { Sparkles, Info, Heart } from 'lucide-react';
+import { Sparkles, Info, Heart, SlidersHorizontal, X } from 'lucide-react';
 
 export default function RecommendationCards() {
-  const { recommendations, inputForm, activeRecipient } = useApp();
+  const { recommendations, inputForm, activeRecipient, selectedForComparison, setSelectedForComparison, setIsComparisonModalOpen } = useApp();
 
   if (!recommendations || !recommendations.gifts || recommendations.gifts.length === 0) {
     return null;
@@ -62,6 +62,36 @@ export default function RecommendationCards() {
           />
         ))}
       </div>
+
+      {/* Floating Side-by-Side Comparison Bar */}
+      {selectedForComparison.length > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-slate-900 text-white px-5 py-3.5 rounded-full shadow-2xl flex items-center gap-4 animate-in slide-in-from-bottom-6 duration-200 border border-slate-700">
+          <div className="flex items-center gap-2">
+            <span className="w-6 h-6 rounded-full bg-brand-500 text-white font-bold text-xs flex items-center justify-center">
+              {selectedForComparison.length}
+            </span>
+            <span className="text-xs font-semibold">
+              {selectedForComparison.length === 1 ? '1 gift selected for comparison' : `${selectedForComparison.length} gifts selected (max 3)`}
+            </span>
+          </div>
+
+          <button
+            onClick={() => setIsComparisonModalOpen(true)}
+            className="py-1.5 px-4 rounded-full bg-gradient-to-r from-brand-500 to-orange-500 hover:from-brand-400 hover:to-orange-400 text-white font-bold text-xs flex items-center gap-1.5 shadow-md active:scale-95 transition-all cursor-pointer"
+          >
+            <SlidersHorizontal className="w-3.5 h-3.5" />
+            <span>Compare Now</span>
+          </button>
+
+          <button
+            onClick={() => setSelectedForComparison([])}
+            className="p-1 rounded-full text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            title="Clear comparison selection"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
     </section>
   );

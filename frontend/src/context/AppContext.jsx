@@ -10,6 +10,14 @@ export function AppProvider({ children }) {
   const [aiStatus, setAiStatus] = useState({ is_live: false, mode: 'Loading...', provider: 'mock' });
   const [toasts, setToasts] = useState([]);
 
+  // User Auth State
+  const [user, setUser] = useState(null);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
+  // Gift Comparison State
+  const [selectedForComparison, setSelectedForComparison] = useState([]);
+  const [isComparisonModalOpen, setIsComparisonModalOpen] = useState(false);
+
   // Recipient profiles
   const [recipients, setRecipients] = useState([]);
   const [activeRecipient, setActiveRecipient] = useState(null);
@@ -265,6 +273,64 @@ export function AppProvider({ children }) {
     addToast(`Loaded sample scenario: ${sampleCase.label}`, 'info');
   };
 
+  // Check existing auth on mount
+  useEffect(() => {
+    const token = localStorage.getItem('giftbro_token');
+    if (token) {
+      api.getMe()
+        .then(res => {
+          if (res.user) setUser(res.user);
+        })
+        .catch(() => {
+          localStorage.removeItem('giftbro_token');
+        });
+    }
+  }, []);
+
+  const loginUser = async (credentials) => {
+    const res = await api.login(credentials);
+    if (res.token) {
+      localStorage.setItem('giftbro_token', res.token);
+      setUser(res.user);
+      addToast(`Welcome back, ${res.user.name}! 👋`, 'success');
+      fetchRecipients();
+    }
+    return res;
+  };
+
+  const registerUser = async (credentials) => {
+    const res = await api.register(credentials);
+    if (res.token) {
+      localStorage.setItem('giftbro_token', res.token);
+      setUser(res.user);
+      addToast(`Account created! Welcome, ${res.user.name}! 🚀`, 'success');
+      fetchRecipients();
+    }
+    return res;
+  };
+
+  const logoutUser = () => {
+    localStorage.removeItem('giftbro_token');
+    setUser(null);
+    addToast('Logged out successfully', 'info');
+    fetchRecipients();
+  };
+
+  const toggleComparison = (gift) => {
+    setSelectedForComparison(prev => {
+      const exists = prev.some(g => (g.id && g.id === gift.id) || g.name === gift.name);
+      if (exists) {
+        return prev.filter(g => (g.id ? g.id !== gift.id : g.name !== gift.name));
+      } else {
+        if (prev.length >= 3) {
+          addToast('You can compare up to 3 gifts at a time', 'warning');
+          return prev;
+        }
+        return [...prev, gift];
+      }
+    });
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -294,6 +360,18 @@ export function AppProvider({ children }) {
         updateGiftStatus,
         loadRecipientIntoGenerator,
         loadSampleCase,
+        user,
+        setUser,
+        isAuthModalOpen,
+        setIsAuthModalOpen,
+        loginUser,
+        registerUser,
+        logoutUser,
+        selectedForComparison,
+        setSelectedForComparison,
+        isComparisonModalOpen,
+        setIsComparisonModalOpen,
+        toggleComparison,
       }}
     >
       {children}

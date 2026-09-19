@@ -3,6 +3,10 @@ import { recommendationController } from '../controllers/recommendationControlle
 import { recipientController } from '../controllers/recipientController.js';
 import { giftController } from '../controllers/giftController.js';
 import { trackingController } from '../controllers/trackingController.js';
+import { authController } from '../controllers/authController.js';
+import { authenticateToken } from '../middleware/authMiddleware.js';
+
+import { authValidation, recipientValidation, giftValidation } from '../middleware/validationMiddleware.js';
 
 const router = express.Router();
 
@@ -15,24 +19,31 @@ router.get('/health', (req, res) => {
   });
 });
 
+// User Authentication Endpoints
+router.post('/auth/register', authValidation.register, authController.register);
+router.post('/auth/login', authValidation.login, authController.login);
+router.get('/auth/me', authenticateToken(true), authController.getMe);
+router.post('/auth/request-reset', authValidation.requestReset, authController.requestReset);
+router.post('/auth/reset-password', authValidation.resetPassword, authController.resetPassword);
+
 // AI Mode / Status
 router.get('/ai-status', recommendationController.getAiStatus);
 
-// Recommendation Endpoints
-router.post('/recommend-gifts', recommendationController.recommendGifts);
-router.post('/refine-gifts', recommendationController.refineGifts);
+// Recommendation Endpoints (Optional Auth to attach user_id if logged in)
+router.post('/recommend-gifts', authenticateToken(false), recommendationController.recommendGifts);
+router.post('/refine-gifts', authenticateToken(false), recommendationController.refineGifts);
 
 // Recipient Endpoints
-router.post('/recipients', recipientController.createRecipient);
-router.get('/recipients', recipientController.getRecipients);
-router.get('/recipients/:id', recipientController.getRecipientById);
-router.put('/recipients/:id', recipientController.updateRecipient);
-router.delete('/recipients/:id', recipientController.deleteRecipient);
+router.post('/recipients', authenticateToken(true), recipientValidation.createOrUpdate, recipientController.createRecipient);
+router.get('/recipients', authenticateToken(true), recipientController.getRecipients);
+router.get('/recipients/:id', authenticateToken(true), recipientController.getRecipientById);
+router.put('/recipients/:id', authenticateToken(true), recipientValidation.createOrUpdate, recipientController.updateRecipient);
+router.delete('/recipients/:id', authenticateToken(true), recipientController.deleteRecipient);
 
 // Gift Endpoints
-router.post('/recipients/:id/gifts', giftController.saveRecipientGift);
-router.put('/gifts/:id/status', giftController.updateStatus);
-router.get('/recipients/:id/history', giftController.getRecipientHistory);
+router.post('/recipients/:id/gifts', authenticateToken(true), giftValidation.save, giftController.saveRecipientGift);
+router.put('/gifts/:id/status', authenticateToken(true), giftValidation.updateStatus, giftController.updateStatus);
+router.get('/recipients/:id/history', authenticateToken(true), giftController.getRecipientHistory);
 
 // Shopping Tracking Endpoints
 router.post('/tracking/shopping-click', trackingController.logShoppingClick);

@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { Bookmark, ShoppingBag, Archive, Sparkles, Tag, DollarSign, Award, ShoppingCart } from 'lucide-react';
+import { Bookmark, ShoppingBag, Archive, Sparkles, Tag, DollarSign, Award, ShoppingCart, SlidersHorizontal } from 'lucide-react';
 import ShoppingModal from './ShoppingModal';
 
 export default function RecommendationCard({ gift, rank }) {
-  const { updateGiftStatus, refineGiftIdeas, isLoading } = useApp();
+  const { updateGiftStatus, refineGiftIdeas, isLoading, selectedForComparison, toggleComparison } = useApp();
   const [isShoppingModalOpen, setIsShoppingModalOpen] = useState(false);
 
   const isSaved = gift.status === 'saved';
   const isBought = gift.status === 'bought';
   const isArchived = gift.status === 'archived';
+  const isSelectedForCompare = selectedForComparison.some(g => (g.id && g.id === gift.id) || g.name === gift.name);
 
   // Match score color
   const getScoreColor = (score) => {
@@ -104,6 +105,20 @@ export default function RecommendationCard({ gift, rank }) {
               >
                 <ShoppingBag className="w-3.5 h-3.5" />
                 <span>{isBought ? 'Bought ✓' : 'Bought'}</span>
+              </button>
+
+              {/* Compare Button */}
+              <button
+                onClick={() => toggleComparison(gift)}
+                className={`flex-1 sm:flex-initial inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                  isSelectedForCompare
+                    ? 'bg-indigo-600 border-indigo-700 text-white shadow-xs'
+                    : 'bg-white border-slate-200 text-slate-700 hover:text-indigo-600 hover:border-indigo-200'
+                }`}
+                title={isSelectedForCompare ? 'Remove from side-by-side comparison' : 'Add to side-by-side comparison matrix'}
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5" />
+                <span>{isSelectedForCompare ? 'Comparing' : 'Compare'}</span>
               </button>
 
               {/* Archive Button */}
