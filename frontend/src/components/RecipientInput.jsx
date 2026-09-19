@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { Sparkles, SlidersHorizontal, Trash2, User, Heart, Calendar, DollarSign, Clock } from 'lucide-react';
+import VoiceInputButton from './VoiceInputButton';
 
 export default function RecipientInput() {
   const { inputForm, setInputForm, generateGiftIdeas, isLoading, activeRecipient, setActiveRecipient } = useApp();
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const baseTextRef = useRef('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -22,6 +24,23 @@ export default function RecipientInput() {
       age: '',
     });
     setActiveRecipient(null);
+  };
+
+  const handleVoiceStart = () => {
+    baseTextRef.current = inputForm.description ? inputForm.description.trim() : '';
+  };
+
+  const handleVoiceUpdate = (transcriptText) => {
+    if (!transcriptText || !transcriptText.trim()) return;
+
+    const base = baseTextRef.current;
+    if (!base) {
+      setInputForm(prev => ({ ...prev, description: transcriptText.trim() }));
+    } else {
+      const needsPunctuation = !/[.!?]$/.test(base);
+      const combined = `${base}${needsPunctuation ? '.' : ''} ${transcriptText.trim()}`;
+      setInputForm(prev => ({ ...prev, description: combined }));
+    }
   };
 
   return (
@@ -43,11 +62,19 @@ export default function RecipientInput() {
         )}
 
         <form onSubmit={handleSubmit}>
-          {/* Conversational Textarea */}
+          {/* Conversational Textarea with Voice Input */}
           <div className="relative">
-            <label htmlFor="description" className="block text-sm font-bold text-slate-800 mb-2">
-              Describe the recipient naturally:
-            </label>
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <label htmlFor="description" className="block text-sm font-bold text-slate-800">
+                Describe the recipient naturally:
+              </label>
+              <VoiceInputButton
+                onVoiceStart={handleVoiceStart}
+                onVoiceUpdate={handleVoiceUpdate}
+                disabled={isLoading}
+              />
+            </div>
+
             <textarea
               id="description"
               rows={4}

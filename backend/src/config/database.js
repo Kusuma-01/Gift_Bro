@@ -113,9 +113,22 @@ function initializeSchema(db) {
       created_at TEXT NOT NULL
     );
 
+    CREATE TABLE IF NOT EXISTS ai_response_cache (
+      id TEXT PRIMARY KEY,
+      cache_key TEXT UNIQUE NOT NULL,
+      request_type TEXT NOT NULL,
+      response_json TEXT NOT NULL,
+      provider TEXT NOT NULL,
+      model TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      expires_at TEXT NOT NULL
+    );
+
     CREATE INDEX IF NOT EXISTS idx_gifts_recipient ON gifts(recipient_id);
     CREATE INDEX IF NOT EXISTS idx_gifts_status ON gifts(status);
     CREATE INDEX IF NOT EXISTS idx_conv_recipient ON conversations(recipient_id);
     CREATE INDEX IF NOT EXISTS idx_clicks_platform ON shopping_clicks(platform);
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_cache_key ON ai_response_cache(cache_key);
+    CREATE INDEX IF NOT EXISTS idx_cache_expires ON ai_response_cache(expires_at);
   `);
 }

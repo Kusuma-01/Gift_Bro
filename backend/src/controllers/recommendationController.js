@@ -76,7 +76,8 @@ export const recommendationController = {
         gifts: savedGifts,
         is_demo_mode: result.isDemoMode,
         demo_reason: result.demoReason || null,
-        provider: result.provider
+        provider: result.provider,
+        source: result.source || (result.isDemoMode ? 'fallback' : 'ai')
       });
     } catch (err) {
       console.error('Error in recommendGifts controller:', err);
@@ -137,7 +138,8 @@ export const recommendationController = {
         gifts: savedGifts,
         is_demo_mode: result.isDemoMode,
         demo_reason: result.demoReason || null,
-        provider: result.provider
+        provider: result.provider,
+        source: result.source || (result.isDemoMode ? 'fallback' : 'ai')
       });
     } catch (err) {
       console.error('Error in refineGifts controller:', err);

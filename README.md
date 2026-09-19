@@ -27,6 +27,8 @@
 - **Dual AI Operation Mode**:
   - **Live LLM Mode**: Seamlessly integrates with Google Gemini (`GEMINI_API_KEY`) or OpenAI (`OPENAI_API_KEY`).
   - **Zero-Config Heuristic Demo Mode**: If no API key is set, an intelligent local rule-based recommendation engine runs out-of-the-box.
+- **⚡ AI Response Caching**: Deterministic SHA-256 cache with configurable TTL (`AI_CACHE_TTL_SECONDS`) eliminates duplicate LLM calls, preserves provider/model safety, and returns fast responses (`source: "cache"`).
+- **🎙️ Voice Recognition Input**: Native browser speech-to-text dictation (`window.SpeechRecognition`) lets users speak recipient details directly into the description field with graceful permission fallback.
 - **1-Click Pre-configured Personas**: Includes instant test buttons for all 4 benchmark personas (Brother, Mom, Coworker, 5yo Daughter).
 
 ---

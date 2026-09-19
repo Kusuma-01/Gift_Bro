@@ -485,6 +485,91 @@ const GIFT_CATALOG = [
     is_clothing: true,
     is_experience: false,
     is_unique: false,
+  },
+  // JEWELRY / ACCESSORIES / TEEN / FASHION (Case 5 & related)
+  {
+    name: "Personalized Initial Name Pendant Necklace",
+    category: "Jewelry & Accessories",
+    price_range: "$25-$35",
+    match_score: 97,
+    tags: ["jewelry", "accessories", "necklace", "fashion", "teen", "14", "birthday", "gift"],
+    reasoning: "A delicate personalized keepsake pendant that feels special and age-appropriate for a 14-year-old.",
+    is_gear: false,
+    is_clothing: false,
+    is_experience: false,
+    is_unique: true,
+  },
+  {
+    name: "Travel Velvet Jewelry Organizer & Storage Case",
+    category: "Jewelry Accessories",
+    price_range: "$20-$28",
+    match_score: 95,
+    tags: ["jewelry", "accessories", "storage", "organizer", "teen", "14"],
+    reasoning: "Plush zippered velvet case with ring rolls and necklace hooks to keep daily jewelry tidy and tangle-free.",
+    is_gear: false,
+    is_clothing: false,
+    is_experience: false,
+    is_unique: false,
+  },
+  {
+    name: "Delicate Crystal Birthstone Charm Bracelet",
+    category: "Jewelry",
+    price_range: "$22-$32",
+    match_score: 94,
+    tags: ["jewelry", "bracelet", "accessories", "birthday", "teen", "14"],
+    reasoning: "Customized with her birthstone for a subtle pop of color and personal birthday meaning.",
+    is_gear: false,
+    is_clothing: false,
+    is_experience: false,
+    is_unique: true,
+  },
+  {
+    name: "DIY Clay & Beaded Charm Jewelry Making Kit",
+    category: "Crafts & Jewelry",
+    price_range: "$18-$26",
+    match_score: 92,
+    tags: ["jewelry", "accessories", "crafts", "diy", "learning", "teen", "14"],
+    reasoning: "Empowers her to design and craft custom aesthetic friendship bracelets and charm necklaces with friends.",
+    is_gear: false,
+    is_clothing: false,
+    is_experience: true,
+    is_unique: true,
+  },
+  {
+    name: "Minimalist 925 Sterling Silver Huggie Hoop Earrings Set",
+    category: "Jewelry",
+    price_range: "$24-$34",
+    match_score: 91,
+    tags: ["jewelry", "earrings", "accessories", "silver", "fashion"],
+    reasoning: "Hypoallergenic sterling silver everyday hoops that go with any outfit.",
+    is_gear: false,
+    is_clothing: false,
+    is_experience: false,
+    is_unique: false,
+  },
+  {
+    name: "Satin Hair Scrunchies & Pastel Claw Clips Gift Box Set",
+    category: "Fashion Accessories",
+    price_range: "$15-$22",
+    match_score: 89,
+    tags: ["accessories", "hair", "fashion", "teen", "14"],
+    reasoning: "Trendy aesthetic hair accessories that prevent breakage while adding a chic touch.",
+    is_gear: false,
+    is_clothing: false,
+    is_experience: false,
+    is_unique: false,
+  },
+  {
+    name: "Fujifilm Instax Mini Instant Camera & Film Accessory Bundle",
+    category: "Teen Tech & Photo",
+    price_range: "$65-$85",
+    match_score: 90,
+    tags: ["teen", "14", "camera", "photo", "birthday", "accessories"],
+    reasoning: "Captures instant memory prints with friends and decorated photo display clips.",
+    is_gear: false,
+    is_clothing: false,
+    is_experience: false,
+    is_unique: true,
   }
 ];
 
@@ -502,7 +587,13 @@ export function generateMockRecommendations({
   excludedGifts = [],
   pastGifts = []
 }) {
-  const combinedText = `${description} ${name} ${relationship} ${age} ${budget} ${occasion} ${userRefinement}`.toLowerCase();
+  const rawText = `${description} ${name} ${relationship} ${age} ${budget} ${occasion} ${userRefinement}`.toLowerCase();
+
+  // Typo normalization
+  const combinedText = rawText
+    .replace(/jewlery|jewelery|jewellry|jewlry/g, 'jewelry')
+    .replace(/accesories|accesory|accessary/g, 'accessories')
+    .replace(/14\s*years?\s*old|14yo|fourteen/g, '14 teen');
 
   // Parse refinement modifiers
   const isCheaperRequested = /cheap|less expensive|under \$?([0-9]+)|budget friendly|affordable|cut price/i.test(userRefinement);
@@ -545,7 +636,7 @@ export function generateMockRecommendations({
     // Relevance scoring against text
     item.tags.forEach(tag => {
       if (combinedText.includes(tag)) {
-        score += 8;
+        score += 25; // Strong boost for tag matches
       }
     });
 
